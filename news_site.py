@@ -10,16 +10,13 @@ def get_news():
     feed = feedparser.parse(rss_url)
     
     news_list = []
-    for entry in feed.entries[:6]:  # Берем 6 новостей (1 главная + 5 справа)
-        # 1. Очищаем текст от HTML-тегов
+    for entry in feed.entries[:6]:
         soup = BeautifulSoup(entry.summary, "html.parser")
         clean_text = soup.get_text()
         
-        # 2. Ищем картинку в тексте новости
         img_tag = soup.find('img')
         img_url = img_tag['src'] if img_tag else ""
 
-        # 3. Красиво форматируем дату
         try:
             pub_date = entry.published_parsed
             formatted_date = datetime.datetime(*pub_date[:6]).strftime("%d.%m.%Y")
@@ -28,7 +25,7 @@ def get_news():
 
         news_list.append({
             "title": entry.title,
-            "text": clean_text[:300] + "...", # Чуть увеличил текст для главной
+            "text": clean_text[:300] + "...",
             "link": entry.link,
             "date": formatted_date,
             "image": img_url
@@ -41,12 +38,22 @@ def home():
     html = """
     <!doctype html>
     <html>
+        <head>
+            <!-- Google tag (gtag.js) -->
+            <script async src="https://www.googletagmanager.com/gtag/js?id=G-G8N8HHGGTV"></script>
+            <script>
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-G8N8HHGGTV');
+            </script>
+        </head>
         <body style="font-family: 'Segoe UI', sans-serif; background: #121212; color: #e0e0e0; padding: 20px; max-width: 1200px; margin: 0 auto;">
             <h1 style="text-align: center; color: #4CAF50; margin-bottom: 30px;">📰 Новостная витрина</h1>
             
             <div style="display: flex; gap: 20px; flex-wrap: wrap;">
                 
-                <!-- ЛЕВАЯ КОЛОНКА (Главная новость) -->
+                <!-- ЛЕВАЯ КОЛОНКА -->
                 <div style="flex: 2; min-width: 300px; background: #1e1e1e; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
                     {% if news[0].image %}
                         <img src="{{ news[0].image }}" style="width: 100%; max-height: 400px; object-fit: cover; border-radius: 8px; margin-bottom: 20px;">
@@ -57,7 +64,7 @@ def home():
                     <a href="{{ news[0].link }}" target="_blank" style="display: inline-block; padding: 10px 20px; background: #4CAF50; color: white; text-decoration: none; border-radius: 5px; font-weight: bold;">Читать полностью →</a>
                 </div>
 
-                <!-- ПРАВАЯ КОЛОНКА (Остальные новости) -->
+                <!-- ПРАВАЯ КОЛОНКА -->
                 <div style="flex: 1; min-width: 250px; display: flex; flex-direction: column; gap: 15px;">
                     {% for news_item in news[1:] %}
                         <div style="background: #1e1e1e; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
